@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -25,9 +26,6 @@ String generateInitials(String name) {
 }
 
 class _HomePageState extends State<HomePage> {
-  String profilePictureUrl =
-      "https://lh3.googleusercontent.com/a/ACg8ocJa6M0TFA-HZm5EDUOA-F6SvWK1CTotZvYKvJC1OIWL_JQ=s96-c";
-  String displayName = "Mashud Ahmed";
 
   // Function to fetch featured doctors
   Future<List<Map<String, dynamic>>> fetchFeaturedDoctors() async {
@@ -39,6 +37,48 @@ class _HomePageState extends State<HomePage> {
     return querySnapshot.docs
         .map((doc) => doc.data() as Map<String, dynamic>)
         .toList();
+  }
+  String getGreeting() {
+  DateTime now = DateTime.now();
+  int hour = now.hour;
+
+  if (hour >= 6 && hour < 12) {
+    return 'Good Morning';
+  } else if (hour >= 12 && hour < 18) {
+    return 'Good Afternoon';
+  } else {
+    return 'Good Evening';
+  }
+}
+final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late String profilePictureUrl = '';
+  late String displayName = '';
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserProfile();
+  }
+
+  Future<void> _fetchUserProfile() async {
+    final User? user = _auth.currentUser;
+    print(user);
+
+    if (user != null) {
+      final DocumentSnapshot<Map<String, dynamic>> userDoc =
+          await _firestore.collection('users').doc(user.uid).get();
+
+      if (userDoc.exists) {
+        final fetchedUrl = userDoc['profilePicture'] ?? '';
+        print('Fetched Profile Picture URL: $fetchedUrl'); // Debug print
+        // print(userDoc['Name']);
+        setState(() {
+          profilePictureUrl = fetchedUrl ?? ''; // Ensure it's not null
+          displayName = userDoc['Name'] ?? '';
+        });
+      }
+    }
   }
 
   // Function to generate initials from the name
@@ -64,7 +104,7 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Good Morning,',
+                        '${getGreeting()},',
                         style: GoogleFonts.redHatDisplay(
                           letterSpacing: 1,
                           color: Colors.white,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MiddlePage extends StatefulWidget {
   const MiddlePage({super.key});
@@ -10,6 +11,9 @@ class MiddlePage extends StatefulWidget {
 class _MiddlePageState extends State<MiddlePage> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(child: Text('Coming Soon...',style: GoogleFonts.poppins(letterSpacing: 1,color: Colors.black),),),
+    );
   }
 }
