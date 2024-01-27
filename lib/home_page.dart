@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:live_care/categories_doctor.dart';
+import 'package:live_care/doctor_details._page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -26,31 +28,39 @@ String generateInitials(String name) {
 }
 
 class _HomePageState extends State<HomePage> {
-
   // Function to fetch featured doctors
   Future<List<Map<String, dynamic>>> fetchFeaturedDoctors() async {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('doctors')
-        .where('rated', isEqualTo: '5')
-        .get();
+    // Replace 'your_collection_name' with your actual Firestore collection name
+    QuerySnapshot<Map<String, dynamic>> querySnapshot =
+        await FirebaseFirestore.instance.collection('doctors').get();
 
-    return querySnapshot.docs
-        .map((doc) => doc.data() as Map<String, dynamic>)
-        .toList();
+    List<Map<String, dynamic>> doctors = [];
+
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc
+        in querySnapshot.docs) {
+      Map<String, dynamic> data = doc.data()!;
+      // Include the document ID in the map
+      data['documentId'] = doc.id;
+      doctors.add(data);
+    }
+
+    return doctors;
   }
+
   String getGreeting() {
-  DateTime now = DateTime.now();
-  int hour = now.hour;
+    DateTime now = DateTime.now();
+    int hour = now.hour;
 
-  if (hour >= 6 && hour < 12) {
-    return 'Good Morning';
-  } else if (hour >= 12 && hour < 18) {
-    return 'Good Afternoon';
-  } else {
-    return 'Good Evening';
+    if (hour >= 6 && hour < 12) {
+      return 'Good Morning';
+    } else if (hour >= 12 && hour < 18) {
+      return 'Good Afternoon';
+    } else {
+      return 'Good Evening';
+    }
   }
-}
-final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late String profilePictureUrl = '';
   late String displayName = '';
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -224,6 +234,122 @@ final FirebaseFirestore _firestore = FirebaseFirestore.instance;
                         ],
                       ),
                     ),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(left: 25, top: 15),
+                    //   child: SizedBox(
+                    //     height: MediaQuery.of(context).size.height * 0.22,
+                    //     child: FutureBuilder(
+                    //       future: fetchFeaturedDoctors(),
+                    //       builder: (context,
+                    //           AsyncSnapshot<List<Map<String, dynamic>>>
+                    //               snapshot) {
+                    //         if (snapshot.connectionState ==
+                    //             ConnectionState.waiting) {
+                    //           return Center(
+                    //             child: CircularProgressIndicator(),
+                    //           );
+                    //         } else if (snapshot.hasError) {
+                    //           return Center(
+                    //             child: Text('Error: ${snapshot.error}'),
+                    //           );
+                    //         } else if (!snapshot.hasData ||
+                    //             snapshot.data!.isEmpty) {
+                    //           return Center(
+                    //             child: Text('No featured doctors available'),
+                    //           );
+                    //         } else {
+                    //           var doctors = snapshot.data!;
+
+                    //           return ListView(
+                    //             scrollDirection: Axis.horizontal,
+                    //             children: doctors.map((doctor) {
+                    //               var doctorName = doctor['Name'];
+                    //               var ratingString = doctor['rated'];
+                    //               var profilePictureUrl =
+                    //                   doctor['profilePicture'];
+                    //               var specialization =
+                    //                   doctor['specialization'];
+                    //               var rating = int.tryParse(ratingString) ?? 0;
+
+                    //               return Card(
+                    //                 color: Colors.cyan.shade400,
+                    //                 margin: EdgeInsets.all(8.0),
+                    //                 child: Container(
+                    //                   width: MediaQuery.of(context).size.width *
+                    //                       0.5,
+                    //                   padding: EdgeInsets.all(8.0),
+                    //                   child: Column(
+                    //                     crossAxisAlignment:
+                    //                         CrossAxisAlignment.center,
+                    //                     mainAxisAlignment:
+                    //                         MainAxisAlignment.center,
+                    //                     children: [
+                    //                       Padding(
+                    //                         padding: const EdgeInsets.symmetric(
+                    //                             horizontal: 10),
+                    //                         child: CircleAvatar(
+                    //                           backgroundColor: Colors.white,
+                    //                           radius: 25,
+                    //                           backgroundImage: (profilePictureUrl
+                    //                                   .isNotEmpty)
+                    //                               ? NetworkImage(
+                    //                                       profilePictureUrl)
+                    //                                   as ImageProvider<Object>?
+                    //                               : null, // Don't specify any image here
+                    //                           child: (profilePictureUrl.isEmpty)
+                    //                               ? Text(
+                    //                                   generateInitials(
+                    //                                       doctorName),
+                    //                                   style: TextStyle(
+                    //                                     fontSize: 18,
+                    //                                     color: Colors.black,
+                    //                                     letterSpacing: 1,
+                    //                                   ),
+                    //                                 )
+                    //                               : null, // Show initials only if there's no image
+                    //                         ),
+                    //                       ),
+                    //                       Padding(
+                    //                         padding: const EdgeInsets.all(3.0),
+                    //                         child: Text(
+                    //                           doctorName,
+                    //                           style: GoogleFonts.redHatDisplay(
+                    //                               letterSpacing: 1),
+                    //                         ),
+                    //                       ),
+                    //                       Row(
+                    //                         mainAxisAlignment:
+                    //                             MainAxisAlignment.center,
+                    //                         children: List.generate(
+                    //                           rating,
+                    //                           (index) => Icon(
+                    //                             Icons.star,
+                    //                             color: Colors
+                    //                                 .amber, // Golden color
+                    //                             size: 15,
+                    //                           ),
+                    //                         ),
+                    //                       ),
+                    //                       Padding(
+                    //                         padding: const EdgeInsets.all(1.0),
+                    //                         child: Text(
+                    //                           specialization,
+                    //                           style: GoogleFonts.redHatDisplay(
+                    //                               letterSpacing: 1),
+                    //                         ),
+                    //                       ),
+
+                    //                     ],
+                    //                   ),
+                    //                 ),
+                    //               );
+                    //             }).toList(),
+                    //           );
+                    //         }
+                    //       },
+                    //     ),
+                    //   ),
+                    // ),
                     Padding(
                       padding: const EdgeInsets.only(left: 25, top: 15),
                       child: SizedBox(
@@ -249,86 +375,123 @@ final FirebaseFirestore _firestore = FirebaseFirestore.instance;
                               );
                             } else {
                               var doctors = snapshot.data!;
+                              var fiveStarDoctors = doctors.where((doctor) {
+                                var ratingString = doctor['rated'];
+                                var rating = int.tryParse(ratingString) ?? 0;
+                                return rating == 5;
+                              }).toList();
 
-                              return ListView(
+                              return ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                children: doctors.map((doctor) {
+                                itemCount: fiveStarDoctors.length,
+                                itemBuilder: (context, index) {
+                                  var doctor = fiveStarDoctors[index];
                                   var doctorName = doctor['Name'];
                                   var ratingString = doctor['rated'];
                                   var profilePictureUrl =
-                                      doctor['ProfilePicture'];
+                                      doctor['profilePicture'];
+                                  var specialization = doctor['specialization'];
                                   var rating = int.tryParse(ratingString) ?? 0;
 
-                                  return Card(
-                                    color: Colors.cyan.shade400,
-                                    margin: EdgeInsets.all(8.0),
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.5,
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 10),
-                                            child: CircleAvatar(
-                                              backgroundColor: Colors.white,
-                                              radius: 25,
-                                              backgroundImage: (profilePictureUrl
-                                                      .isNotEmpty)
-                                                  ? NetworkImage(
-                                                          profilePictureUrl)
-                                                      as ImageProvider<Object>?
-                                                  : null, // Don't specify any image here
-                                              child: (profilePictureUrl.isEmpty)
-                                                  ? Text(
-                                                      generateInitials(
-                                                          doctorName),
-                                                      style: TextStyle(
-                                                        fontSize: 18,
-                                                        color: Colors.black,
-                                                        letterSpacing: 1,
-                                                      ),
-                                                    )
-                                                  : null, // Show initials only if there's no image
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(3.0),
-                                            child: Text(
-                                              doctorName,
-                                              style: GoogleFonts.redHatDisplay(
-                                                  letterSpacing: 1),
-                                            ),
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: List.generate(
-                                              rating,
-                                              (index) => Icon(
-                                                Icons.star,
-                                                color: Colors
-                                                    .amber, // Golden color
-                                                size: 15,
+                                  return GestureDetector(
+                                    onTap: () {
+                                      var documentId = doctor['documentId'];
+                                      print(
+                                          'Clicked on doctor with documentId: $documentId');
+                                      // Perform additional actions with the document ID as needed
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              DoctorDetails(documentId: documentId),
+                                        ),
+                                      );
+                                    },
+                                    child: Card(
+                                      color: Colors.cyan.shade400,
+                                      margin: EdgeInsets.all(8.0),
+                                      child: Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.5,
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10),
+                                              child: CircleAvatar(
+                                                backgroundColor: Colors.white,
+                                                radius: 25,
+                                                backgroundImage:
+                                                    (profilePictureUrl
+                                                            .isNotEmpty)
+                                                        ? NetworkImage(
+                                                            profilePictureUrl)
+                                                        : null,
+                                                child: (profilePictureUrl
+                                                        .isEmpty)
+                                                    ? Text(
+                                                        generateInitials(
+                                                            doctorName),
+                                                        style: TextStyle(
+                                                          fontSize: 18,
+                                                          color: Colors.black,
+                                                          letterSpacing: 1,
+                                                        ),
+                                                      )
+                                                    : null,
                                               ),
                                             ),
-                                          )
-                                        ],
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(3.0),
+                                              child: Text(
+                                                doctorName,
+                                                style:
+                                                    GoogleFonts.redHatDisplay(
+                                                        letterSpacing: 1),
+                                              ),
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: List.generate(
+                                                rating,
+                                                (index) => Icon(
+                                                  Icons.star,
+                                                  color: Colors.amber,
+                                                  size: 15,
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(1.0),
+                                              child: Text(
+                                                specialization,
+                                                style:
+                                                    GoogleFonts.redHatDisplay(
+                                                        letterSpacing: 1),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   );
-                                }).toList(),
+                                },
                               );
                             }
                           },
                         ),
                       ),
                     ),
+
                     Padding(
                       padding:
                           const EdgeInsets.only(top: 10, left: 25, right: 25),
@@ -384,34 +547,58 @@ final FirebaseFirestore _firestore = FirebaseFirestore.instance;
                           children: [
                             _buildSpecialtyItem(
                                 'Dermatology', Icons.accessibility_new, () {
-                              // Handle Dermatology click
-                              print('Dermatology clicked');
+                                  Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              CategoriesDoctor(documentId:"Dermatology"),
+                                        ),
+                                      );
                             }),
                             _buildSpecialtyItem(
                                 'Ophthalmology', Icons.remove_red_eye, () {
-                              // Handle Ophthalmology click
-                              print('Ophthalmology clicked');
+                                  Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              CategoriesDoctor(documentId:"Ophthalmology"),
+                                        ),
+                                      );
                             }),
                             _buildSpecialtyItem(
                                 'Neurology', Icons.sentiment_very_satisfied,
                                 () {
-                              // Handle Neurology click
-                              print('Neurology clicked');
+                                  Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              CategoriesDoctor(documentId:"Neurology"),
+                                        ),
+                                      );
                             }),
                             _buildSpecialtyItem(
                                 'Orthopedics', Icons.elderly_woman_sharp, () {
-                              // Handle Orthopedics click
-                              print('Orthopedics clicked');
+                                  Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              CategoriesDoctor(documentId:"Orthopedics"),
+                                        ),
+                                      );
                             }),
                             _buildSpecialtyItem(
                                 'Gynecology', Icons.pregnant_woman, () {
-                              // Handle Gynecology click
-                              print('Gynecology clicked');
+                                  Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              CategoriesDoctor(documentId:"Gynecology"),
+                                        ),
+                                      );
                             }),
                             _buildSpecialtyItem('Cardiology', Icons.favorite,
                                 () {
-                              // Handle Cardiology click
-                              print('Cardiology clicked');
+                                  Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              CategoriesDoctor(documentId:"Cardiology"),
+                                        ),
+                                      );
                             }),
                           ],
                         ),
@@ -445,7 +632,7 @@ final FirebaseFirestore _firestore = FirebaseFirestore.instance;
             SizedBox(height: 3),
             Text(name,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(letterSpacing: 1, fontSize: 11)),
+                style: GoogleFonts.poppins(letterSpacing: 1, fontSize: 10)),
           ],
         ),
       ),

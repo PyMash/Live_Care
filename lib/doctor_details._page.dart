@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -5,34 +7,65 @@ import 'package:live_care/splashScreen.dart';
 import 'home_page.dart';
 
 class DoctorDetails extends StatefulWidget {
-  const DoctorDetails({super.key});
+  final String documentId;
+
+  const DoctorDetails({Key? key, required this.documentId}) : super(key: key);
 
   @override
   State<DoctorDetails> createState() => _DoctorDetailsState();
 }
 
 class _DoctorDetailsState extends State<DoctorDetails> {
-  String profilePictureUrl =
-      "https://lh3.googleusercontent.com/a/ACg8ocJa6M0TFA-HZm5EDUOA-F6SvWK1CTotZvYKvJC1OIWL_JQ=s96-c";
-  String doctorName = "Mashud Talukdar";
-  String Ocupation = "Neurology";
-  int rating = 5;
-  Color selectedColor = Colors.green.shade700;
-  String about =
-      "A seasoned neurologist, navigates the intricate pathways of the human brain with unwavering expertise, diagnosing and treating neurological disorders with precision.";
+  late Map<String, dynamic> doctorData = {}; // Initialize with an empty map
   int selectedIndex = -1;
   int selectedIndexForDate = -1;
-  String selectedTime = ""; // Variable to hold selected time
   DateTime selectedDate = DateTime.now();
 
   @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> fetchData() async {
+    try {
+      DocumentSnapshot doctorSnapshot = await FirebaseFirestore.instance
+          .collection('doctors')
+          .doc(widget.documentId)
+          .get();
+
+      if (doctorSnapshot.exists) {
+        setState(() {
+          doctorData = doctorSnapshot.data() as Map<String, dynamic>;
+        });
+      } else {
+        print('Document does not exist');
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (doctorData == null) {
+      return CircularProgressIndicator(); // You can replace this with a loading indicator or any other widget
+    }
+
+    String profilePictureUrl = doctorData['profilePicture'] ?? '';
+    String doctorName = doctorData['Name'] ?? '';
+    String occupation = doctorData['specialization'] ?? '';
+    int rating = int.tryParse(doctorData['rated'] ?? '') ?? 0;
+    String about = doctorData['about'] ?? '';
     return Scaffold(
       backgroundColor: Colors.cyan.shade300,
       body: SafeArea(
         child: Column(children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 30),
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
             child: Column(
               children: [
                 Row(
@@ -72,7 +105,7 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          doctorName,
+                          "Dr. " + doctorName,
                           style: GoogleFonts.redHatDisplay(
                             letterSpacing: 1,
                             color: Colors.white,
@@ -80,7 +113,7 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                           ),
                         ),
                         Text(
-                          Ocupation,
+                          occupation,
                           style: GoogleFonts.redHatDisplay(
                             letterSpacing: 1,
                             color: Colors.white,
@@ -164,7 +197,7 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                       height: 10,
                     ),
                     SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.23,
+                      height: MediaQuery.of(context).size.height * 0.22,
                       child: GridView.count(
                         crossAxisCount: 4,
                         children: List.generate(
@@ -175,15 +208,12 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        'Available Date',
-                        style: GoogleFonts.poppins(
-                          letterSpacing: 0.5,
-                          fontSize: MediaQuery.of(context).size.width * 0.04,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    Text(
+                      'Available Date',
+                      style: GoogleFonts.poppins(
+                        letterSpacing: 0.5,
+                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     SizedBox(
@@ -208,7 +238,7 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                     ),
                     Center(
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (selectedIndex != -1 &&
                               selectedIndexForDate != -1) {
                             final selectedDateTime = DateTime(
@@ -222,9 +252,16 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                                 DateFormat('yyyy-MM-dd HH:mm')
                                     .format(selectedDateTime);
                             print('Selected Time: $formattedDateTime');
+
+                            //                     await _firestore.collection('users').doc(userCredential.user!.uid).set({
+                            // 'Name': _nameController.text.trim(),
+                            // 'Email': _emailController.text.trim(),
+                            // 'profilePicture': ''
+                            // });
                             Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
-                                    builder: (context) => SplashScreen()));
+                                    builder: (context) =>
+                                        const SplashScreen()));
                           } else {
                             print('Please select both time and date.');
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
