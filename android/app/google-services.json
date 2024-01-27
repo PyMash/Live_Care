@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "567759663869",
+    "project_id": "live-care-97ffb",
+    "storage_bucket": "live-care-97ffb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567759663869:android:a5d4d43499cf5e6f200494",
+        "android_client_info": {
+          "package_name": "com.example.live_care"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDn8RMzxCtw78XYKriaU6yqSCjnczL_Gls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
