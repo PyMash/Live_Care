@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:live_care/middle_page.dart';
+import 'package:live_care/booked_doctor.dart';
 
 import 'home_page.dart';
 import 'profilePage.dart';
@@ -13,7 +13,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  List pages = [HomePage(), MiddlePage(), ProfilePage()];
+  List pages = [HomePage(), FetchDetails(), ProfilePage()];
   int currentIndex = 0;
 
   void onTap(int index) {
@@ -40,7 +40,7 @@ class _MainPageState extends State<MainPage> {
         elevation: 0,
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.apps), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.show_chart_rounded), label: "Details"),
+          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: "Details"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),

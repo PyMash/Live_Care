@@ -26,7 +26,7 @@ class _DoctorDetailsState extends State<DoctorDetails> {
     super.initState();
     fetchData();
   }
-
+  bool loading = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -237,54 +237,85 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                       height: 15,
                     ),
                     Center(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          if (selectedIndex != -1 &&
-                              selectedIndexForDate != -1) {
-                            final selectedDateTime = DateTime(
-                              selectedDate.year,
-                              selectedDate.month,
-                              selectedDate.day,
-                              selectedIndex +
-                                  9, // Adding 9 hours to match the selected time
-                            );
-                            final formattedDateTime =
-                                DateFormat('yyyy-MM-dd HH:mm')
-                                    .format(selectedDateTime);
-                            print('Selected Time: $formattedDateTime');
+                      child: loading
+                          ? const CircularProgressIndicator(
+                              color: Color.fromARGB(255, 6, 36, 8),
+                            )
+                          : ElevatedButton(
+                              onPressed: () async {
+                                if (selectedIndex != -1 &&
+                                    selectedIndexForDate != -1) {
+                                  final selectedDateTime = DateTime(
+                                    selectedDate.year,
+                                    selectedDate.month,
+                                    selectedDate.day,
+                                    selectedIndex +
+                                        9, // Adding 9 hours to match the selected time
+                                  );
+                                  final formattedDateTime =
+                                      DateFormat('yyyy-MM-dd HH:mm')
+                                          .format(selectedDateTime);
+                                  print('Selected Time: $formattedDateTime');
+                                  setState(() {
+                                    loading = true;
+                                  });
 
-                            //                     await _firestore.collection('users').doc(userCredential.user!.uid).set({
-                            // 'Name': _nameController.text.trim(),
-                            // 'Email': _emailController.text.trim(),
-                            // 'profilePicture': ''
-                            // });
-                            Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const SplashScreen()));
-                          } else {
-                            print('Please select both time and date.');
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              backgroundColor: Colors.green,
-                              content: Text(
-                                'Please select both time and date to book the appointment',
-                                textAlign: TextAlign.center,
+                                  final User? user = _auth.currentUser;
+
+                                  await _firestore
+                                      .collection('users')
+                                      .doc(user!.uid)
+                                      .collection('BookedAppointment')
+                                      .doc(widget.documentId)
+                                      .set({
+                                    'DoctorId': widget.documentId,
+                                    'DateTime': formattedDateTime,
+                                    'CurrentStatus': 'Requested'
+                                  });
+
+                                  await _firestore
+                                      .collection('doctors')
+                                      .doc(widget.documentId)
+                                      .collection('BookedAppointment')
+                                      .doc(user.uid)
+                                      .set({
+                                    'PatientId': widget.documentId,
+                                    'DateTime': formattedDateTime,
+                                    'CurrentStatus': 'Requested'
+                                  });
+                                  setState(() {
+                                    loading = false;
+                                  });
+                                  // ignore: use_build_context_synchronously
+                                  Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const SplashScreen()));
+                                } else {
+                                  // print('Please select both time and date.');
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    backgroundColor: Colors.green,
+                                    content: Text(
+                                      'Please select both time and date to book the appointment',
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.poppins(
+                                          letterSpacing: 1,
+                                          color: Colors.black),
+                                    ),
+                                    duration: Duration(seconds: 1),
+                                  ));
+                                }
+                              },
+                              child: Text(
+                                "Book Appointment",
                                 style: GoogleFonts.poppins(
-                                    letterSpacing: 1, color: Colors.black),
+                                    letterSpacing: 1, color: Colors.white),
                               ),
-                              duration: Duration(seconds: 1),
-                            ));
-                          }
-                        },
-                        child: Text(
-                          "Book Appointment",
-                          style: GoogleFonts.poppins(
-                              letterSpacing: 1, color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green.shade500,
-                        ),
-                      ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green.shade500,
+                              ),
+                            ),
                     )
                   ],
                 ),

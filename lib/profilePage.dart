@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:live_care/booked_doctor.dart';
 import 'package:live_care/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../home_page.dart';
@@ -55,7 +56,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.cyan.shade300,
+      backgroundColor: Colors.white,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
@@ -63,7 +64,7 @@ class _ProfilePageState extends State<ProfilePage> {
           style: GoogleFonts.redHatDisplay(
               letterSpacing: 1.2, fontWeight: FontWeight.w500,color: Colors.black),
         ),
-        backgroundColor: Colors.cyan.shade300,
+        backgroundColor: Colors.white,
         centerTitle: true,
       ),
       body: Column(
@@ -116,7 +117,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25),
             child: Divider(
-              color: Colors.white,
+              color: Colors.cyan.shade200,
               height: 2,
             ),
           ),
@@ -133,13 +134,20 @@ class _ProfilePageState extends State<ProfilePage> {
                   //     builder: (context) => EditProfilePage(),
                   //   ),
                   // );
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      backgroundColor: Colors.cyan.shade300,
+                      content: Text(
+                        'Coming Soon',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(letterSpacing: 1, color: Colors.black),
+                      )));
                 }),
                 _buildOptionTile('Appoinments', Icons.tune, () {
-                  // Navigator.of(context).push(
-                  //   MaterialPageRoute(
-                  //     builder: (context) => MyListViewPage(),
-                  //   ),
-                  // );
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => FetchDetails(),
+                    ),
+                  );
                 }),
                 _buildOptionTile('Help & Support', Icons.phone, () {
                   // Navigator.of(context).push(
@@ -147,6 +155,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   //     builder: (context) => const HelpPage(),
                   //   ),
                   // );
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      backgroundColor: Colors.cyan.shade300,
+                      content: Text(
+                        'Coming Soon',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(letterSpacing: 1, color: Colors.black),
+                      )));
                 }),
                 _buildOptionTile('About Us', Icons.help, () {
                   // Navigator.of(context).push(
@@ -154,6 +169,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   //     builder: (context) => const AboutPage(),
                   //   ),
                   // );
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      backgroundColor: Colors.cyan.shade300,
+                      content: Text(
+                        'Coming Soon',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(letterSpacing: 1, color: Colors.black),
+                      )));
                 }),
               ],
             ),
@@ -161,7 +183,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25),
             child: Divider(
-              color: Colors.white,
+              color: Colors.cyan.shade200,
               height: 2,
             ),
           ),
