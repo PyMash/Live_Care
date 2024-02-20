@@ -15,7 +15,6 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _fetchUserProfile();
   }
@@ -27,7 +26,9 @@ class _ProfilePageState extends State<ProfilePage> {
   // final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late String profilePicture = '';
+  // ignore: non_constant_identifier_names
   late String Name = '';
+  // ignore: non_constant_identifier_names
   late String Email = '';
 
   Future<void> _fetchUserProfile() async {
@@ -41,9 +42,6 @@ class _ProfilePageState extends State<ProfilePage> {
         final fetchedUrl = userDoc['profilePicture'] ?? '';
         final fetchedName = userDoc['Name'] ?? '';
         final fetchedEmail = userDoc['Email'] ?? '';
-        print('Fetched Profile Picture URL: $fetchedUrl'); // Debug print
-        print('Fetched Name: $fetchedName'); // Debug print
-        print('Fetched Email: $fetchedEmail'); 
 
         setState(() {
           profilePicture = fetchedUrl ?? ''; // Ensure it's not null
@@ -100,7 +98,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.7),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Text(
@@ -124,7 +122,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: ListView(
-              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               children: [
@@ -145,14 +143,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildOptionTile('Appoinments', Icons.tune, () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => FetchDetails(),
+                      builder: (context) => const FetchDetails(),
                     ),
                   );
                 }),
                 _buildOptionTile('Help & Support', Icons.phone, () {
                   // Navigator.of(context).push(
                   //   MaterialPageRoute(
-                  //     builder: (context) => const HelpPage(),
+                  //     builder: (context) => const ChatPage(),
                   //   ),
                   // );
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -187,7 +185,7 @@ class _ProfilePageState extends State<ProfilePage> {
               height: 2,
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           TextButton(
@@ -201,14 +199,24 @@ class _ProfilePageState extends State<ProfilePage> {
                     .then((value) => Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => MyApp()), // Your new screen
+                              builder: (context) => const MyApp()), // Your new screen
                           (Route<dynamic> route) =>
                               false, // Remove all previous routes
                         ));
               } catch (error) {
-                print(error.toString());
+                // ignore: use_build_context_synchronously
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      backgroundColor: Colors.cyan.shade300,
+                      content: Text(
+                        error.toString(),
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(letterSpacing: 1, color: Colors.black),
+                      )));
               }
-            }, // Handle log out action
+            },
+            style: TextButton.styleFrom(
+              alignment: Alignment.centerRight,
+            ), // Handle log out action
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -217,18 +225,15 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: GoogleFonts.poppins(
                       letterSpacing: 1, color: Colors.black),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 5,
                 ),
-                Icon(
+                const Icon(
                   Icons.logout,
                   color: Colors.black,
                   size: 18,
                 )
               ],
-            ),
-            style: TextButton.styleFrom(
-              alignment: Alignment.centerRight,
             ),
           ),
           
@@ -240,7 +245,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildOptionTile(String title, IconData icon, Function() onTap) {
     return ListTile(
       leading: Icon(icon,color: Colors.black,),
-      title: Text(title,style: TextStyle(color: Colors.black),),
+      title: Text(title,style: const TextStyle(color: Colors.black),),
       trailing: const Icon(
         Icons.arrow_forward_ios,
         size: 18,

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:live_care/chat_screen.dart';
 
 class FetchDetails extends StatefulWidget {
   const FetchDetails({Key? key}) : super(key: key);
@@ -168,12 +169,35 @@ class _FetchDetailsState extends State<FetchDetails> {
                 appointmentDetails.doctorDetails?.specialization ?? '';
             var dateTime = appointmentDetails.dateTime;
             var currentStatus = appointmentDetails.currentStatus;
-            print(dateTime);
+            Widget actionButton;
+            if (currentStatus == 'Accepted') {
+              actionButton = ElevatedButton(
+                onPressed: () {
+                  String chatid = _auth.currentUser!.uid.toString();
+                  chatid += appointmentDetails.doctorId.toString();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ChatPage(chatDocumentId: chatid,name: doctorName,),
+                    ),
+                  );
+                },
+                child: Text(
+                  'Chat with Doctor',
+                  style: GoogleFonts.poppins(
+                      letterSpacing: 1, color: Colors.black),
+                ),
+              );
+            } else {
+              // For status 'Rejected'
+              actionButton = SizedBox(); // No button needed for rejected status
+            }
+
+            // Determine the card color based on the current status
+            Color cardColor =
+                currentStatus == 'Rejected' ? Colors.red : Colors.cyan.shade300;
 
             return GestureDetector(
               onTap: () {
-                print(
-                    'Clicked on doctor with documentId: ${appointmentDetails.documentId}');
                 if (currentStatus == 'Requested') {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       backgroundColor: Colors.cyan.shade300,
@@ -183,99 +207,126 @@ class _FetchDetailsState extends State<FetchDetails> {
                         style: GoogleFonts.poppins(
                             letterSpacing: 1, color: Colors.black),
                       )));
-                } else {
+                } else if (currentStatus == 'Rejected'){
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       backgroundColor: Colors.cyan.shade300,
                       content: Text(
-                        'Chat feature is coming soon',
+                        'Sorry Doctor is unavailable right now,\n Please try another doctor',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.poppins(
                             letterSpacing: 1, color: Colors.black),
                       )));
                 }
-                // Add navigation or other actions here
+                else if (currentStatus == 'Accepted'){
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      backgroundColor: Colors.cyan.shade300,
+                      content: Text(
+                        'Click on chat button to continue',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                            letterSpacing: 1, color: Colors.black),
+                      )));
+                }
+                else {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      backgroundColor: Colors.cyan.shade300,
+                      content: Text(
+                        'Sorry something went wrong\nPlease try again after sometime',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                            letterSpacing: 1, color: Colors.black),
+                      )));
+                }
+
               },
               child: Card(
-                color: Colors.cyan.shade300,
+                color: cardColor,
                 margin: EdgeInsets.all(8.0),
                 child: Container(
                   height: 200,
                   width: MediaQuery.of(context).size.width * 0.5,
                   padding: EdgeInsets.all(8.0),
-                  child: Row(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            "Dr. " + doctorName,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            style: GoogleFonts.poppins(
-                              letterSpacing: 1,
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.045,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Dr. " + doctorName,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: GoogleFonts.poppins(
+                                  letterSpacing: 1,
+                                  fontSize: MediaQuery.of(context).size.width * 0.045,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                specialization,
+                                style: GoogleFonts.redHatDisplay(
+                                  letterSpacing: 1,
+                                  color: Colors.white,
+                                  fontSize: MediaQuery.of(context).size.width * 0.04,
+                                ),
+                              ),
+                              Text(
+                                'Time: ${DateFormat('HH:mm').format(dateTime)}',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                'Date: ${DateFormat('dd MMM yyyy').format(dateTime)}',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                'Current Status: ${currentStatus}',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              
+                            ],
+                          ),
+                          SizedBox(
+                            width: 20,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Container(
+                              width: 110,
+                              height: 110,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                image: (profilePictureUrl.isNotEmpty)
+                                    ? DecorationImage(
+                                        image: NetworkImage(profilePictureUrl),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : null,
+                              ),
+                              child: (profilePictureUrl.isEmpty)
+                                  ? Center(
+                                      child: Text(
+                                        generateInitials(doctorName),
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          color: Colors.black,
+                                          letterSpacing: 1,
+                                        ),
+                                      ),
+                                    )
+                                  : null,
                             ),
                           ),
-                          Text(
-                            specialization,
-                            style: GoogleFonts.redHatDisplay(
-                              letterSpacing: 1,
-                              color: Colors.white,
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.04,
-                            ),
-                          ),
-                          Text(
-                            'Time: ${DateFormat('HH:mm').format(dateTime)}',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          Text(
-                            'Date: ${DateFormat('dd MMM yyyy').format(dateTime)}',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          Text(
-                            'Current Status: ${currentStatus}',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          
                         ],
                       ),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Container(
-                          width: 110,
-                          height: 110,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            image: (profilePictureUrl.isNotEmpty)
-                                ? DecorationImage(
-                                    image: NetworkImage(profilePictureUrl),
-                                    fit: BoxFit.cover,
-                                  )
-                                : null,
-                          ),
-                          child: (profilePictureUrl.isEmpty)
-                              ? Center(
-                                  child: Text(
-                                    generateInitials(doctorName),
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.black,
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
-                                )
-                              : null,
-                        ),
-                      ),
+                      SizedBox(height: 8,),
+                      actionButton,
                     ],
                   ),
                 ),

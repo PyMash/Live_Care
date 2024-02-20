@@ -279,7 +279,7 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                                       .collection('BookedAppointment')
                                       .doc(user.uid)
                                       .set({
-                                    'PatientId': widget.documentId,
+                                    'PatientId': user.uid,
                                     'DateTime': formattedDateTime,
                                     'CurrentStatus': 'Requested'
                                   });
