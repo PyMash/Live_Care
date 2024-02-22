@@ -61,33 +61,41 @@ class _HomePageState extends State<HomePage> {
   }
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  late String profilePictureUrl = '';
+  late String _image = '';
   late String displayName = '';
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserProfile();
+    _fetchUserData();
   }
 
-  Future<void> _fetchUserProfile() async {
-    final User? user = _auth.currentUser;
-    print(user);
+  Future _fetchUserData() async {
+    var image;
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (userDoc.exists) {
+          final userData = userDoc.data() as Map<String, dynamic>;
+          image = userData['profilepicture'].toString();
+          if (image == 'null') {
+            image = '';
+          }
 
-    if (user != null) {
-      final DocumentSnapshot<Map<String, dynamic>> userDoc =
-          await _firestore.collection('users').doc(user.uid).get();
-
-      if (userDoc.exists) {
-        final fetchedUrl = userDoc['profilePicture'] ?? '';
-        print('Fetched Profile Picture URL: $fetchedUrl'); // Debug print
-        // print(userDoc['Name']);
-        setState(() {
-          profilePictureUrl = fetchedUrl ?? ''; // Ensure it's not null
-          displayName = userDoc['Name'] ?? '';
-        });
+          setState(() {
+            displayName = userData['Name'];
+            _image = image;
+          });
+        }
+        print(_image);
       }
+    } catch (error) {
+      print('Error fetching user data: $error');
     }
   }
 
@@ -134,20 +142,18 @@ class _HomePageState extends State<HomePage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: CircleAvatar(
-                      backgroundColor: Colors.white,
+                      backgroundColor: Colors.black,
                       radius: 22,
-                      backgroundImage: (profilePictureUrl.isNotEmpty)
-                          ? NetworkImage(profilePictureUrl)
-                              as ImageProvider<Object>?
+                      backgroundImage: (_image.isNotEmpty)
+                          ? NetworkImage(_image) as ImageProvider<Object>?
                           : null, // Don't specify any image here
-                      child: (profilePictureUrl.isEmpty)
+                      child: (_image.isEmpty)
                           ? Text(
                               generateInitials(displayName),
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.black,
-                                letterSpacing: 1,
-                              ),
+                              style: GoogleFonts.poppins(
+                                  fontSize: 22,
+                                  color: Colors.white,
+                                  letterSpacing: 1),
                             )
                           : null, // Show initials only if there's no image
                     ),

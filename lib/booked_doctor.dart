@@ -291,13 +291,13 @@ class _FetchDetailsState extends State<FetchDetails> {
                             ],
                           ),
                           SizedBox(
-                            width: 20,
+                            width: 10,
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Container(
-                              width: 110,
-                              height: 110,
+                              width: 100,
+                              height: 100,
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(10),

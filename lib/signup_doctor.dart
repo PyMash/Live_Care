@@ -18,6 +18,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool loading = false;
 
   Future<void> _signUp() async {
     try {
@@ -70,6 +71,9 @@ class _SignUpPageState extends State<SignUpPage> {
         );
         return;
       }
+      setState(() {
+        loading = true;
+      });
 
       // Perform signup if all validations pass
       UserCredential userCredential =
@@ -83,6 +87,7 @@ class _SignUpPageState extends State<SignUpPage> {
         'Email': _emailController.text.trim(),
         'profilePicture': ''
       });
+      loading = false;
 
       // Navigate to the next screen or perform any other actions after successful signup
       Navigator.push(
@@ -187,20 +192,25 @@ class _SignUpPageState extends State<SignUpPage> {
               obscureText: true,
             ),
             SizedBox(height: 20.0),
-            Container(
-              width: MediaQuery.of(context).size.width / 2,
-              child: ElevatedButton(
-                // onPressed: _signUp,
-                onPressed: () {
-                  _signUp();
-                },
+            loading
+                ? const CircularProgressIndicator(
+                    color: Color.fromARGB(255, 6, 36, 8),
+                  )
+                : Container(
+                    width: MediaQuery.of(context).size.width / 2,
+                    child: ElevatedButton(
+                      // onPressed: _signUp,
+                      onPressed: () {
 
-                child: Text(
-                  'Sign Up',
-                  style: GoogleFonts.poppins(color: Colors.black),
-                ),
-              ),
-            ),
+                        _signUp();
+                      },
+
+                      child: Text(
+                        'Sign Up',
+                        style: GoogleFonts.poppins(color: Colors.black),
+                      ),
+                    ),
+                  ),
             GestureDetector(
               onTap: () {
                 // Navigator.push(context,

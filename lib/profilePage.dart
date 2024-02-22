@@ -2,9 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:live_care/booked_doctor.dart';
+import 'package:live_care/help_page.dart';
 import 'package:live_care/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../home_page.dart';
+import 'aboutus_page.dart';
+import 'edit_profile.dart';
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -16,7 +19,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    _fetchUserProfile();
+    _fetchUserData();
   }
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -30,26 +33,35 @@ class _ProfilePageState extends State<ProfilePage> {
   late String Name = '';
   // ignore: non_constant_identifier_names
   late String Email = '';
+  late String _image = '';
+  Future _fetchUserData() async {
+    var image;
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (userDoc.exists) {
+          final userData = userDoc.data() as Map<String, dynamic>;
+          image = userData['profilepicture'].toString();
+          if (image == 'null') {
+            image = '';
+          }
 
-  Future<void> _fetchUserProfile() async {
-    final User? user = _auth.currentUser;
-
-      // Fetch the user data from Firestore
-      final DocumentSnapshot<Map<String, dynamic>> userDoc =
-          await _firestore.collection('users').doc(user!.uid).get();
-
-      if (userDoc.exists) {
-        final fetchedUrl = userDoc['profilePicture'] ?? '';
-        final fetchedName = userDoc['Name'] ?? '';
-        final fetchedEmail = userDoc['Email'] ?? '';
-
-        setState(() {
-          profilePicture = fetchedUrl ?? ''; // Ensure it's not null
-          Name = fetchedName ?? '';
-          Email = fetchedEmail ?? '';
-        });
+          setState(() {
+            Name = userData['Name'];
+            Email = userData['Email'].toString();
+            _image = image;
+          });
+        }
+        print(_image);
       }
+    } catch (error) {
+      print('Error fetching user data: $error');
     }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,22 +86,21 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
               children: [
                 CircleAvatar(
-                  backgroundColor: Colors.black,
-                  radius: 42,
-                  backgroundImage: (profilePicture.isNotEmpty)
-                      ? NetworkImage(profilePicture)
-                          as ImageProvider<Object>?
-                      : null, // Don't specify any image here
-                  child: (profilePicture.isEmpty)
-                      ? Text(
-                          generateInitials(Name),
-                          style: GoogleFonts.poppins(
-                              fontSize: 22,
-                              color: Colors.white,
-                              letterSpacing: 1),
-                        )
-                      : null, // Show initials only if there's no image
-                ),
+                      backgroundColor: Colors.black,
+                      radius: 45,
+                      backgroundImage: (_image.isNotEmpty)
+                          ? NetworkImage(_image) as ImageProvider<Object>?
+                          : null, // Don't specify any image here
+                      child: (_image.isEmpty)
+                          ? Text(
+                              generateInitials(Name),
+                              style: GoogleFonts.poppins(
+                                  fontSize: 22,
+                                  color: Colors.white,
+                                  letterSpacing: 1),
+                            )
+                          : null, // Show initials only if there's no image
+                    ),
                 const SizedBox(height: 13),
                 Text(
                   Name,
@@ -127,18 +138,11 @@ class _ProfilePageState extends State<ProfilePage> {
               physics: const NeverScrollableScrollPhysics(),
               children: [
                 _buildOptionTile('Edit Profile', Icons.settings, () {
-                  // Navigator.of(context).push(
-                  //   MaterialPageRoute(
-                  //     builder: (context) => EditProfilePage(),
-                  //   ),
-                  // );
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      backgroundColor: Colors.cyan.shade300,
-                      content: Text(
-                        'Coming Soon',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(letterSpacing: 1, color: Colors.black),
-                      )));
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => EditProfilePage(),
+                    ),
+                  );
                 }),
                 _buildOptionTile('Appoinments', Icons.tune, () {
                   Navigator.of(context).push(
@@ -148,32 +152,20 @@ class _ProfilePageState extends State<ProfilePage> {
                   );
                 }),
                 _buildOptionTile('Help & Support', Icons.phone, () {
-                  // Navigator.of(context).push(
-                  //   MaterialPageRoute(
-                  //     builder: (context) => const ChatPage(),
-                  //   ),
-                  // );
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      backgroundColor: Colors.cyan.shade300,
-                      content: Text(
-                        'Coming Soon',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(letterSpacing: 1, color: Colors.black),
-                      )));
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const HelpPage(),
+                    ),
+                  );
+                  
                 }),
                 _buildOptionTile('About Us', Icons.help, () {
-                  // Navigator.of(context).push(
-                  //   MaterialPageRoute(
-                  //     builder: (context) => const AboutPage(),
-                  //   ),
-                  // );
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      backgroundColor: Colors.cyan.shade300,
-                      content: Text(
-                        'Coming Soon',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(letterSpacing: 1, color: Colors.black),
-                      )));
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const AboutPage(),
+                    ),
+                  );
+                
                 }),
               ],
             ),
